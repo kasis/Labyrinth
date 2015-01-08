@@ -4,9 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/melkonyan/NetBeansProjects/Project14/src/labyrinth/Game.java</file>
-            <file>file:/home/melkonyan/NetBeansProjects/Project14/src/labyrinth/Logger.java</file>
             <file>file:/home/melkonyan/NetBeansProjects/Project14/src/labyrinth/GamePanel.java</file>
+            <file>file:/home/melkonyan/NetBeansProjects/Project14/src/generator/Generate.java</file>
+            <file>file:/home/melkonyan/NetBeansProjects/Project14/src/generator/parameters.txt</file>
             <file>file:/home/melkonyan/NetBeansProjects/Project14/src/labyrinth/Labyrinth.java</file>
+            <file>file:/home/melkonyan/NetBeansProjects/Project14/level.properties</file>
+            <file>file:/home/melkonyan/NetBeansProjects/Project14/src/labyrinth/Direction.java</file>
         </group>
     </open-files>
 </project-private>

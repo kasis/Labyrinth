@@ -1,4 +1,4 @@
-/*
+/*m
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -14,6 +14,7 @@ import com.googlecode.lanterna.gui.dialog.MessageBox;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.sun.xml.internal.bind.v2.runtime.MarshallerImpl;
 import java.io.File;
 import java.io.IOException;
 import sun.misc.ProxyGenerator;
@@ -34,6 +35,10 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     
     private TerminalObserver mTerminalObserver;
     
+    private About mAbout = new About();
+    
+    private OptionsMenu mOptionsMenu = new OptionsMenu();
+    
     /**
      * @param args the command line arguments
      */
@@ -48,81 +53,20 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     }
 
     public Game() {
+        
         System.out.println(new File(".").getAbsolutePath());
         GUIScreen gui = TerminalFacade.createGUIScreen();
         mGui = gui;
         Screen screen = gui.getScreen();
+        
         mTerminal = screen.getTerminal();
         screen.startScreen();
-        mLab = new Labyrinth(mTerminal, new Position(20, 10));
-        try {
-            Generate.main(null);
-            mLab.loadLabyrinth();
-            createPlayer();
-            mLab.drawLabyrinth();
-            
-        } catch (Exception e) {
-            System.out.println("Error occurred while loading labyrinth");
-            e.printStackTrace();
-        }
+        mLab = new Labyrinth(mTerminal, new Position(1, 0), this);
         mPanel = new GamePanel(mTerminal);
         mPanel.setLivesNum(2);
-        mPanel.draw();
+        onNewGame();
         mTerminalObserver = new TerminalObserver(mTerminal);
         mTerminalObserver.setOnClickListener(this);
-    }
-    
-    
-    private void showMenu() {
-        ActionListDialog.showActionListDialog(mGui, "Menu", null, 40, true, new Action() {
-
-            @Override
-            public void doAction() {
-                onNewGame();
-            }
-            
-            @Override 
-            public String toString() {
-                return "New game";
-            }
-        }, new Action() {
-
-            @Override
-            public void doAction() {
-                mGui.getScreen().stopScreen();
-                mTerminalObserver.stop();
-            }
-            
-            @Override 
-            public String toString() {
-                return "Exit";
-            }
-        });
-        mGui.getScreen().clear();
-        mGui.getScreen().refresh();
-        mPanel.draw();
-        mLab.redraw();
-    }
-    
-    private void showAbout() {
-        MessageBox.showMessageBox(mGui, "About", 
-                    "Welcome to Labyrinth, dear Player!\n"
-                            + "Your goal is to find an exit of the Labyrinth and to not be killed by monsters \nthat are living here.\n"
-                            + "In order to exit the Labyrinth you also need to collect a Key at first.\n"
-                            + "Here are the types of element and creatures in the Labyrinth:\n"
-                            + new Player(null, null).getChar() + " - is You who is smiling yet...\n"
-                            + new Wall(null).getChar() + " - is a Wall. No one can go throung it.\n"
-                            + new Enter(null).getChar() + " - is an Enter. This is a start of your journey.\n"
-                            + new Exit(null).getChar() + " - is an Exit. This is a goal You want to reach.\n"
-                            + new Keys(null).getChar() + " - is a Key. You need to find it to exit the Labyrinth.\n"
-                            + new StaticMonster(null).getChar() + " - is a Monster. All it wants is to kill you.\n"
-                            + new MovingMonster(null).getChar() + " - is a Moving Monster. It is like a Monster but it also can move."
-        );
-        mGui.getScreen().clear();
-        mGui.getScreen().refresh();
-        mPanel.draw();
-        mLab.redraw();
-   
     }
     
     public void createPlayer() {
@@ -133,21 +77,29 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     
     @Override
     public boolean canMove(Movable m, Position to) {
-        Logger.log("Labyrinth.canMove: Wants to move to position " + to);
+        //Logger.log("Labyrinth.canMove: Wants to move to position " + to);
         if (mLab.outOfBound(to)) {
             return false;
         }
         GameObject obstacle = mLab.getObject(to);
-        return !(obstacle instanceof Wall) 
-                && !(obstacle instanceof Exit && !mLab.getPlayer().hasKey())
-                && !(obstacle instanceof Enter);
+        if (m instanceof Player) {
+            return !(obstacle instanceof Wall) 
+                    && !(obstacle instanceof Exit && !mLab.getPlayer().hasKey())
+                        && !(obstacle instanceof Enter);
+        } else if (m instanceof MovingMonster) {
+            return obstacle instanceof Road;
+        } else {
+            //Who is moving then?
+            return false;
+        }
     }
+        
 
     @Override
     public void hasMoved(Movable m, Position from, Position to) {
-        Logger.log("Labyrinth.hasMoved: Has moved to position " + to);
+        //Logger.log("Labyrinth.hasMoved: " + m + " moved to position " + to);
+        GameObject obstacle = mLab.getObject(to);
         if (m instanceof Player) {
-            GameObject obstacle = mLab.getObject(to);
             if (obstacle instanceof Keys) {
                 mLab.deleteObject(to);
                 mLab.getPlayer().pickUpKey();
@@ -158,31 +110,48 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
                 return;
             } else if (obstacle instanceof Exit) {
                 onWin();
+                return;
             }
             mLab.movePlayer(from);
-            
+        } else if (m instanceof MovingMonster) {
+            if (mLab.getPlayer().getPosition().equals(to)) {
+                onDie();
+            }
+            mLab.moveMonster((MovingMonster) m, from);
+        
         }
     }
 
     @Override
     public void onClicked(Key key) {
-        Logger.log("Labyrinth.onClicked: key " + key + " clicked.");
+        //Logger.log("Labyrinth.onClicked: key " + key + " clicked.");
         System.out.println(key.getCharacter());
         if (key.getCharacter() == 'm') {
-            showMenu();
+            mOptionsMenu.show();
         } else if (key.getCharacter() == 'a') {
-            showAbout();
+            mAbout.show();
         } else {
             try {
                 mLab.getPlayer().move(Direction.fromKey(key));
             } catch (RuntimeException e) {}
         }
     }
+    private void onNewLevel() {
+        try {
+            mLab.createLevel();
+            createPlayer();
+            mLab.draw();
+            mLab.start();
+        } catch (Exception e) {
+            System.out.println("Error occurred while loading labyrinth");
+            e.printStackTrace();
+        }
+    }
     
     private void onNewGame() {
         mPanel.reset();
         mPanel.draw();
-        mLab.redraw();
+        onNewLevel();
     }
     
     private void onDie() {
@@ -195,15 +164,92 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         }
         mPanel.draw();
         mLab.redraw();
+        
+        
     }
     
     private void onWin() {
         mPanel.nextLevel();
         mPanel.deleteKey();
         mPanel.draw();
-        mLab.getPlayer().dropKey();
-        mLab.redraw();
+        mLab.stop();
+        onNewLevel();
     }
     
+    private abstract class GameMenu{
+        private boolean mCanceled;
+        
+        public void show() {
+            mLab.stop();
+            mCanceled = true;
+            showWindow();
+            mGui.getScreen().clear();
+            mGui.getScreen().refresh();
+            mPanel.draw();
+            mLab.refresh();
+            if (mCanceled) {
+                mLab.start();
+            }
+            
+        }
+        
+        protected void setCanceled(boolean canceled) {
+            mCanceled = canceled;
+        }
+        protected abstract void showWindow();
+    }
     
+    private class About extends GameMenu {
+        @Override 
+        protected void showWindow() {
+            MessageBox.showMessageBox(mGui, "About", 
+                    "Welcome to Labyrinth, dear Player!\n"
+                            + "Your goal is to find an exit of the Labyrinth and to not be killed by monsters \nthat are living here.\n"
+                            + "In order to exit the Labyrinth you also need to collect a Key at first.\n"
+                            + "Here are the types of element and creatures in the Labyrinth:\n"
+                            + new Player(null, null).getChar() + " - is You who is smiling yet...\n"
+                            + new Wall(null).getChar() + " - is a Wall. No one can go throung it.\n"
+                            + new Enter(null).getChar() + " - is an Enter. This is a start of your journey.\n"
+                            + new Exit(null).getChar() + " - is an Exit. This is a goal You want to reach.\n"
+                            + new Keys(null).getChar() + " - is a Key. You need to find it to exit the Labyrinth.\n"
+                            + new StaticMonster(null).getChar() + " - is a Monster. All it wants is to kill you.\n"
+                            + new MovingMonster(null, null).getChar() + " - is a Moving Monster. It is like a Monster but it also can move."
+                );
+        }       
+    }
+    
+    private class OptionsMenu extends GameMenu {
+        @Override
+        protected void showWindow() {
+            ActionListDialog.showActionListDialog(mGui, "Menu", null, 40, true, 
+                new Action() {
+
+                    @Override
+                    public void doAction() {
+                        onNewGame();
+                        setCanceled(false);
+                    }
+
+                    @Override 
+                    public String toString() {
+                        return "New game";
+                    }
+                }, 
+                new Action() {
+
+                    @Override
+                    public void doAction() {
+                        mGui.getScreen().stopScreen();
+                        mTerminalObserver.stop();
+                        setCanceled(false);
+                    }
+
+                    @Override 
+                    public String toString() {
+                        return "Exit";
+                }
+            });
+        }
+    }
 }
+    

@@ -6,6 +6,9 @@
 package labyrinth;
 
 import com.googlecode.lanterna.terminal.Terminal;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Class that represents a monster that can move inside of labyrinth.
@@ -13,8 +16,19 @@ import com.googlecode.lanterna.terminal.Terminal;
  */
 public class MovingMonster extends Monster implements Movable {
 
-    MovingMonster(Position pos) {
+    private MonsterMover mMover;
+    
+    MovingMonster(Position pos, MovableObserver observer) {
         super(pos);
+        mMover = new MonsterMover(observer);
+    }
+    
+    public void start() {
+        mMover.start();
+    }
+    
+    public void stop() {
+        mMover.stop();
     }
     
     @Override
@@ -29,12 +43,91 @@ public class MovingMonster extends Monster implements Movable {
 
     @Override
     public Position calcNewPosition(Direction dir) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return dir.getNewPosition(getPosition());
     }
 
     @Override
     public void goToPosition(Position pos) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        setPosition(pos);
     }
     
+    @Override 
+    public String toString() {
+        return "MovingMonster";
+    }
+    
+    private class MonsterMover extends Mover {
+
+        private MovableObserver mObserver;
+    
+        private Direction mCurrDirection;
+        
+        private int mCurrDirId;
+        
+        private Random mRandom = new Random();
+        
+        private long mSpeed = 500;
+        
+        Timer mTimer;
+        
+        public MonsterMover(MovableObserver observer) {
+            super(MovingMonster.this, observer);
+            mCurrDirId = mRandom.nextInt(4);
+        }
+        
+        public void move() {
+            int initId = mCurrDirId;
+            if (tryMove()) {
+                return;
+            }
+            int turn = mRandom.nextInt(2) > 0 ? 1 : -1;
+            mCurrDirId = (mCurrDirId + turn + 4) % 4;
+            mCurrDirection = Direction.fromInt(mCurrDirId);
+            if (tryMove()) {
+                return;
+            }
+            mCurrDirId = (mCurrDirId - turn + 4) % 4;
+            if (tryMove()) {
+                return;
+            }
+            mCurrDirId = (initId + 2) % 4;
+            tryMove();
+        }
+        
+        private boolean tryMove() {
+            mCurrDirection = Direction.fromInt(mCurrDirId);
+            Position from = getMovable().getPosition();
+            Position to = getMovable().calcNewPosition(mCurrDirection);
+            if (getObserver().canMove(getMovable(), to)) {
+                move(mCurrDirection);
+                return true;
+            }
+            return false;
+        }
+        
+        public void start() {
+            if (mTimer != null) {
+                throw new RuntimeException("Moving monster is already started");
+            }
+            mTimer = new Timer();
+            
+            mTimer.scheduleAtFixedRate(
+                new TimerTask() {
+
+                    @Override
+                    public void run() {
+                        move();
+                    }
+                    
+                 }, mSpeed, mSpeed);
+        }
+        
+        public void stop() {
+            if (mTimer != null) {
+                mTimer.cancel();
+                mTimer = null;
+                Logger.log("MovingMonster has stopped.");
+            }
+        }
+    }
 }

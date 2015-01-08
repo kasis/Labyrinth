@@ -22,7 +22,7 @@ public class Generate {
    static final char cIn = '\u2639';
    static final char cOut = '\u263A';
    static final char rP = free;
-   static final Random random = new Random();
+   static Random random;
    static final Properties param = new Properties();
    static final Properties prop = new Properties();
 
@@ -75,7 +75,6 @@ public class Generate {
 
    static long init() throws Exception{
       long seed = read();
-      random.setSeed(seed);
       field = new char[height][width];
       occupied = new boolean[height][width];
       for (int x = height - 1; x > -1; x--){
@@ -111,7 +110,7 @@ public class Generate {
          idx++;
       }
       occupied[points[points.length-1][0]][points[points.length-1][1]]=true;
-      return seed;
+      return 0;
    }
 
    static void putField(){
@@ -227,7 +226,8 @@ public class Generate {
       String s = param.getProperty("Density");
       if (s!=null) density = Double.valueOf(s).doubleValue();
       s = param.getProperty("Seed");
-      return s==null ? random.nextLong() : Long.valueOf(s).longValue();
+      s = null; //Fix bug with generator.
+      return s==null ? new Random().nextLong() : Long.valueOf(s).longValue();
    }
 
    static void write(long seed){
@@ -255,6 +255,8 @@ public class Generate {
    }
 
    public static void main(String args[]) {
+      prop.clear();
+      random = new Random();
       printField=(args!=null && args.length!=0);
       try {
          final long seed = init();

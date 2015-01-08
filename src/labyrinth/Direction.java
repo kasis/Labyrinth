@@ -21,32 +21,62 @@ public class Direction {
     /**
      * Create direction from keyboard button
      * @param key one of four direction button on keyboard(ArrowUp, ArrowDown, ArrowLeft, ArrowRight)
+     * @return direction for specified key.
      */
     public static Direction fromKey(Key key) {
         int dx, dy;
         switch(key.getKind()) {
             case ArrowDown:
-                dx = 0; 
-                dy = 1;
-                break;
-            case ArrowLeft:
-                dx = -1;
+                dx = 1; 
                 dy = 0;
                 break;
-            case ArrowUp: 
+            case ArrowLeft:
                 dx = 0;
                 dy = -1;
                 break;
-            case ArrowRight: 
-                dx = 1;
+            case ArrowUp: 
+                dx = -1;
                 dy = 0;
+                break;
+            case ArrowRight: 
+                dx = 0;
+                dy = 1;
                 break;
             default:
                 throw new RuntimeException("Unable to create Direction from key " + key);
         }
         return new Direction(dx, dy);
     }
-    
+    /**
+     * Create direction from integer number.
+     * @param   id integer number from 0 to 3
+     * @return  appropriate direction: 0 - down, 1 - left, 2 - up, 3 - right  
+     */
+    public static Direction fromInt(int id) {
+        int dx, dy;
+        switch(id) {
+            case 0: 
+                dx = 1;
+                dy = 0;
+                break;
+            case 1: 
+                dx = 0;
+                dy = -1;
+                break;
+            case 2: 
+                dx = -1; 
+                dy = 0;
+                break;
+            case 3:
+                dx = 0;
+                dy = 1;
+                break;
+            default:
+                throw new RuntimeException("Unable to create Direction from given int " + id);
+        }
+        return new Direction(dx, dy);
+    }
+
     private Direction(int dx, int dy) {
         this.dx = dx;
         this.dy = dy;

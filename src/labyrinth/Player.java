@@ -83,4 +83,8 @@ public class Player extends GameObject implements Movable {
         setPosition(pos);
     }
     
+    @Override 
+    public String toString() {
+        return "Player";
+    }
 }

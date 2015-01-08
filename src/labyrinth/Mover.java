@@ -26,6 +26,22 @@ public class Mover {
     }
     
     /**
+     * Return movable observer of the mover. 
+     * @return movable observer
+     */
+    public MovableObserver getObserver() {
+        return mObserver;
+    }
+    
+    /**
+     * Return movable of the mover.
+     * @return movable
+     */
+    public Movable getMovable() {
+        return mMovable;
+    }
+    
+    /**
      * Move object in the given direction
      * @param dir   direction to move.
      */
