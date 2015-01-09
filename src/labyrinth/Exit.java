@@ -26,5 +26,10 @@ public class Exit extends GameObject {
     public Terminal.Color getColor() {
         return Terminal.Color.WHITE;
     }
+
+    @Override
+    public int getType() {
+        return GameObject.EXIT;
+    }
     
 }

@@ -27,5 +27,10 @@ public class Keys extends GameObject {
     public Terminal.Color getColor() {
         return Terminal.Color.YELLOW;
     }
+
+    @Override
+    public int getType() {
+        return GameObject.KEYS;
+    }
     
 }

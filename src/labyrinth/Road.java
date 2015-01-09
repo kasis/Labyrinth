@@ -27,5 +27,13 @@ public class Road extends GameObject {
     public Terminal.Color getColor() {
         return Terminal.Color.BLACK;
     }
+
+    @Override
+    public int getType() {
+        return GameObject.ROAD;
+    }
+    
+    
+    
     
 }

@@ -7,12 +7,19 @@ package labyrinth;
 
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.Terminal.Color;
+import java.util.Properties;
 
 /**
  *
  * @author melkonyan
  */
 public class GamePanel {
+    
+    private static final String PROPERTIES_LIVES = "Lives";
+    
+    private static final String PROPERTIES_HAS_KEY = "Has_key";
+    
+    private static final String PROPERTIES_LEVEL = "Level";
     
     private static final char LIFE_CHAR = '❤';
     
@@ -103,6 +110,19 @@ public class GamePanel {
         mHasKey = false;
         mLevelNum = 1;
         mLivesNum = mInitLivesNum;
+    }
+    
+    public void save(Properties prop) {
+        prop.setProperty(PROPERTIES_LIVES, ""+mLivesNum);
+        prop.setProperty(PROPERTIES_HAS_KEY, ""+mHasKey);
+        prop.setProperty(PROPERTIES_LEVEL, ""+mLevelNum);
+    }
+    
+    public void load(Properties prop) {
+        mLivesNum = Integer.parseInt(prop.getProperty(PROPERTIES_LIVES));
+        mLevelNum = Integer.parseInt(prop.getProperty(PROPERTIES_LEVEL));
+        mHasKey = Boolean.parseBoolean(prop.getProperty(PROPERTIES_HAS_KEY));
+        Logger.log("GamePanel.load: " + mLivesNum + " " + mLevelNum);
     }
     
     public void draw() {

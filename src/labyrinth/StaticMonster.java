@@ -26,5 +26,12 @@ public class StaticMonster extends Monster {
     public Terminal.Color getColor() {
         return Terminal.Color.BLUE;
     }
+
+    @Override
+    public int getType() {
+        return GameObject.STATIC_MONSTER;
+    }
+    
+    
     
 }

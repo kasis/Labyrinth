@@ -26,5 +26,12 @@ public class Wall extends GameObject {
     public Terminal.Color getColor() {
         return Terminal.Color.WHITE;
     }
+
+    @Override
+    public int getType() {
+        return GameObject.WALL;
+    }
+    
+    
     
 }

@@ -14,16 +14,22 @@ import com.googlecode.lanterna.gui.dialog.MessageBox;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.sun.xml.internal.bind.v2.runtime.MarshallerImpl;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import sun.misc.ProxyGenerator;
+import java.util.Properties;
+import javax.swing.JFileChooser;
 /**
  * Class, that contains logic of the game.
  * @author melkonyan
  */
 public class Game implements MovableObserver, TerminalObserver.OnClickListener {
 
+    private static final String PROPERTIES_PLAYER_X = "Player_x";
+    
+    private static final String PROPERTIES_PLAYER_Y = "Player_y";
     
     private Terminal mTerminal;
     
@@ -136,6 +142,63 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
             } catch (RuntimeException e) {}
         }
     }
+    
+    public void load() {
+        JFileChooser fc = new JFileChooser(new File("."));
+        int choice = fc.showOpenDialog(null);
+        if (choice == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fc.getSelectedFile();
+                Properties prop = new Properties();
+                prop.load(new FileInputStream(file));
+                Logger.log("Game.load: File loaded.");
+                load(prop);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public void load(Properties prop) throws Exception {
+        Player player;
+        player = new Player(new Position(
+                Integer.parseInt(prop.getProperty(PROPERTIES_PLAYER_X)),
+                Integer.parseInt(prop.getProperty(PROPERTIES_PLAYER_Y))
+        ), this);
+        mLab.setPlayer(player);
+        mLab.setData(prop);
+        mPanel.load(prop);
+        mLab.redraw();
+    }
+    
+    public void save() {
+        JFileChooser fc = new JFileChooser(new File("."));
+        int choice = fc.showSaveDialog(null);
+        if (choice == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fc.getSelectedFile();
+                Properties prop = new Properties();
+                Logger.log(file.getAbsolutePath());
+                save(prop);
+                prop.store(new FileOutputStream(file.getAbsolutePath()), null);
+                
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    
+    
+    public void save(Properties prop) {
+        prop.setProperty(PROPERTIES_PLAYER_X, ""+mLab.getPlayer().getPosition().getX());
+        prop.setProperty(PROPERTIES_PLAYER_Y, ""+mLab.getPlayer().getPosition().getY());
+        mPanel.save(prop);
+        mLab.save(prop);
+    }
+    
     private void onNewLevel() {
         try {
             mLab.createLevel();
@@ -234,7 +297,35 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
                     public String toString() {
                         return "New game";
                     }
+                    
                 }, 
+                new Action() {
+
+                    @Override
+                    public void doAction() {
+                        load();
+                    }
+                    
+                    @Override 
+                    public String toString() {
+                        return "Load game";
+                    } 
+                
+                }, 
+                new Action() {
+
+                    @Override
+                    public void doAction() {
+                        save();
+                    }
+                    
+                    @Override 
+                    public String toString() {
+                        return "Save game";
+                    } 
+                
+                }, 
+                
                 new Action() {
 
                     @Override

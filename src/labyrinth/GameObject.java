@@ -13,6 +13,22 @@ import com.googlecode.lanterna.terminal.Terminal.Color;
  */
 public abstract class GameObject {
 
+    public static final int WALL = 0;
+    
+    public static final int ENTER = 1;
+    
+    public static final int EXIT = 2;
+    
+    public static final int STATIC_MONSTER = 3;
+    
+    public static final int MOVING_MONSTER = 4;
+    
+    public static final int KEYS = 5;
+            
+    public static final int PLAYER = -1;
+    
+    public static final int ROAD = -1;
+    
     private Position mPosition;
     
     /**
@@ -26,6 +42,12 @@ public abstract class GameObject {
      * @return  class that represents color of the object 
      */
     public abstract Color getColor();
+    
+    /** 
+     * Return type of object;
+     * @return  integer corresponding to type of object
+     */
+    public abstract int getType();
     
     /**
      * Construct object with given position. 

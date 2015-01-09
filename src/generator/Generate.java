@@ -6,7 +6,7 @@ public class Generate {
 
    static final String paramFileName = "parameters.txt";
    static final String propFileName = "level.properties";
-
+   
    static boolean printField = false; // any command line argument sets this to true
    static double density = 3.0;
 

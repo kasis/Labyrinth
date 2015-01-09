@@ -87,4 +87,9 @@ public class Player extends GameObject implements Movable {
     public String toString() {
         return "Player";
     }
+
+    @Override
+    public int getType() {
+        return GameObject.PLAYER;
+    }
 }

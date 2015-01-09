@@ -55,6 +55,11 @@ public class MovingMonster extends Monster implements Movable {
     public String toString() {
         return "MovingMonster";
     }
+
+    @Override
+    public int getType() {
+        return GameObject.MOVING_MONSTER;
+    }
     
     private class MonsterMover extends Mover {
 

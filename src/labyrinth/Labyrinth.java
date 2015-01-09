@@ -23,6 +23,9 @@ import java.util.Properties;
  */
 public class Labyrinth {
 
+    private static final String PROPERTY_HEIGHT = "Height";
+    private static final String PROPERTY_WIDTH  = "Width";
+    
     private Terminal mTerminal; 
     private Position mStart;
     private MovableObserver mObserver;
@@ -59,21 +62,30 @@ public class Labyrinth {
      * @throws Exception 
      */
     public void createLevel() throws Exception {
+        Generate.main(null);
+        Properties prop = Utils.load("level.properties");
+        setData(prop);
+    }
+    
+    /**
+     * Create labyrinth map from properties file.
+     * @param prop          file that contains information about map height, width and all objects
+     * @throws Exception    is thrown if properties file is invalid
+     */
+    public void setData(Properties prop) throws Exception {
         mEnters = new ArrayList<>();
         mExits = new ArrayList<>();
         mMonsters = new ArrayList<>();
-        
-        Generate.main(null);
-        Properties prop = load("", "level.properties");
-        mMapHeight = Integer.parseInt(prop.getProperty("Height"));
-        mMapWidth = Integer.parseInt(prop.getProperty("Width"));
+        mMapHeight = Integer.parseInt(prop.getProperty(PROPERTY_HEIGHT));
+        mMapWidth = Integer.parseInt(prop.getProperty(PROPERTY_WIDTH));
         Logger.log("Labyrinth.loadLabyrinth: height - " + mMapHeight + "; width - " + mMapWidth);
         mInitMap = new GameObject[mMapHeight][mMapWidth];
         mLiveMap = new GameObject[mMapHeight][mMapWidth];
         Enumeration keys = prop.propertyNames();
         while (keys.hasMoreElements()) {
             String key = (String) keys.nextElement();
-            if ("Height".equals(key) || "Width".equals(key)) {
+            if (!key.contains(",")) {
+                Logger.log(key);
                 continue;
             }
             String value = prop.getProperty(key);
@@ -95,6 +107,26 @@ public class Labyrinth {
                 }
             }
         }
+    }
+    
+    public void save(Properties prop) {
+        prop.setProperty(PROPERTY_HEIGHT, ""+mMapHeight);
+        prop.setProperty(PROPERTY_WIDTH, ""+mMapWidth);
+        
+        for (int i = 0; i < mMapHeight; i++) {
+            for (int j = 0; j < mMapWidth; j++) {
+                GameObject obj = mLiveMap[i][j];
+                if (obj.getType() == GameObject.ROAD) {
+                    continue;
+                }
+                saveObject(obj, prop);
+            }
+        }
+    } 
+    
+    private void saveObject(GameObject obj, Properties prop) {
+        Position pos = obj.getPosition();
+        prop.setProperty(pos.getY()+","+pos.getX(), ""+obj.getType());
     }
     
     /**
@@ -243,30 +275,19 @@ public class Labyrinth {
         mVisibleFrame.drawObject(obj);
     }
     
-    private Properties load(String path, String name) throws IOException {
-        Properties prop = new Properties();
-        InputStream in = new FileInputStream(name);
-        if (in == null) {
-            throw new IOException("Could not open properties file.");
-        }
-        prop.load(in);
-        in.close();
-        return prop;
-    }
-
     private GameObject createGameObject(Position pos, int type) throws Exception {
         switch (type) {
-            case 0:
+            case GameObject.WALL:
                 return new Wall(pos);
-            case 1:
+            case GameObject.ENTER:
                 return new Enter(pos);
-            case 2:
+            case GameObject.EXIT:
                 return new Exit(pos);
-            case 3:
+            case GameObject.STATIC_MONSTER:
                 return new StaticMonster(pos);
-            case 4:
+            case GameObject.MOVING_MONSTER:
                 return new MovingMonster(pos, mObserver);
-            case 5:
+            case GameObject.KEYS:
                 return new Keys(pos);
             default:
                 throw new Exception("Unknow type of GameObject");
