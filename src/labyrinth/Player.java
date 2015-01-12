@@ -15,8 +15,6 @@ import com.googlecode.lanterna.terminal.Terminal;
  */
 public class Player extends GameObject implements Movable {
 
-    private boolean mHasKey = false;
-    
     private Mover mMover;
     
     /**
@@ -37,28 +35,6 @@ public class Player extends GameObject implements Movable {
     public void move(Direction dir) {
         Logger.log("Player.move: Moving into direction " + dir);
         mMover.move(dir);
-    }
-    
-    /**
-     * After this method been called player has {@link Keys}.
-     */
-    public void pickUpKey() {
-        mHasKey = true;
-    }
-    
-    /** 
-     * After this method been called player has no {@link Keys} anymore.
-     */
-    public void dropKey() {
-        mHasKey = false;
-    }
-    
-    /**
-     * Check if player has {@link Keys}.
-     * @return  true if player has {@link Keys}, false otherwise.
-     */
-    public boolean hasKey() {
-        return mHasKey;
     }
     
     @Override

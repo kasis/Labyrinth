@@ -170,7 +170,7 @@ public class Labyrinth {
      * Save given game object and draw it on it's position.
      * @param obj   object to draw. 
      */
-    public void setObject(GameObject obj) {
+    public synchronized void setObject(GameObject obj) {
         mLiveMap[obj.getPosition().getX()][obj.getPosition().getY()] = obj;
         drawObject(obj);
     }
@@ -179,7 +179,7 @@ public class Labyrinth {
      * Delete given object and draw {@link Road} instead of it. 
      * @param pos   position of object to delete
      */
-    public void deleteObject(Position pos) {
+    public synchronized void deleteObject(Position pos) {
         Road road = new Road(pos);
         setObject(road);
     }

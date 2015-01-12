@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Level;
 import javax.swing.JFileChooser;
 /**
  * Class, that contains logic of the game.
@@ -38,6 +39,8 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     private Labyrinth mLab; 
     
     private GamePanel mPanel;
+    
+    private GameInfo mInfo;
     
     private TerminalObserver mTerminalObserver;
     
@@ -68,11 +71,13 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         mTerminal = screen.getTerminal();
         screen.startScreen();
         mLab = new Labyrinth(mTerminal, new Position(1, 0), this);
-        mPanel = new GamePanel(mTerminal);
-        mPanel.setLivesNum(2);
+        mInfo = new GameInfo(2);
+        mPanel = new GamePanel(mTerminal, mInfo);
         onNewGame();
         mTerminalObserver = new TerminalObserver(mTerminal);
         mTerminalObserver.setOnClickListener(this);
+        
+        
     }
     
     public void createPlayer() {
@@ -89,8 +94,9 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         }
         GameObject obstacle = mLab.getObject(to);
         if (m instanceof Player) {
+            Logger.log(""+mInfo.hasKey());
             return !(obstacle instanceof Wall) 
-                    && !(obstacle instanceof Exit && !mLab.getPlayer().hasKey())
+                    && !(obstacle instanceof Exit && !mInfo.hasKey())
                         && !(obstacle instanceof Enter);
         } else if (m instanceof MovingMonster) {
             return obstacle instanceof Road;
@@ -108,8 +114,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         if (m instanceof Player) {
             if (obstacle instanceof Keys) {
                 mLab.deleteObject(to);
-                mLab.getPlayer().pickUpKey();
-                mPanel.addKey();
+                mInfo.addKey();
                 mPanel.draw();
             } else if (obstacle instanceof Monster) {
                 onDie();
@@ -168,7 +173,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         ), this);
         mLab.setPlayer(player);
         mLab.setData(prop);
-        mPanel.load(prop);
+        mInfo.load(prop);
         mLab.redraw();
     }
     
@@ -195,7 +200,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     public void save(Properties prop) {
         prop.setProperty(PROPERTIES_PLAYER_X, ""+mLab.getPlayer().getPosition().getX());
         prop.setProperty(PROPERTIES_PLAYER_Y, ""+mLab.getPlayer().getPosition().getY());
-        mPanel.save(prop);
+        mInfo.save(prop);
         mLab.save(prop);
     }
     
@@ -212,17 +217,17 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     }
     
     private void onNewGame() {
-        mPanel.reset();
+        mInfo.reset();
         mPanel.draw();
         onNewLevel();
     }
     
     private void onDie() {
-        mLab.getPlayer().dropKey();
-        if (mPanel.hasMoreLives()) {
-            mPanel.deleteLife();
-            mPanel.deleteKey();
+        if (mInfo.hasMoreLives()) {
+            mInfo.deleteLife();
+            mInfo.deleteKey();
         } else {
+            mLab.stop();
             onNewGame();
         }
         mPanel.draw();
@@ -232,33 +237,46 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
     }
     
     private void onWin() {
-        mPanel.nextLevel();
-        mPanel.deleteKey();
+        mInfo.nextLevel();
+        mInfo.deleteKey();
         mPanel.draw();
         mLab.stop();
         onNewLevel();
     }
     
     private abstract class GameMenu{
-        private boolean mCanceled;
+        
+        private boolean mRestartLab;
+        
+        private boolean mRedrawLab;
         
         public void show() {
             mLab.stop();
-            mCanceled = true;
+            mRestartLab = true;
+            mRedrawLab = true;
             showWindow();
             mGui.getScreen().clear();
             mGui.getScreen().refresh();
             mPanel.draw();
-            mLab.refresh();
-            if (mCanceled) {
+            
+            if (mRedrawLab) {
+                mLab.refresh();
+            }
+            
+            if (mRestartLab) {
                 mLab.start();
             }
             
         }
         
-        protected void setCanceled(boolean canceled) {
-            mCanceled = canceled;
+        protected void cancelRestart() {
+            mRestartLab = false;
         }
+        
+        protected void cancelRedraw() {
+            mRedrawLab = false;
+        }
+        
         protected abstract void showWindow();
     }
     
@@ -290,7 +308,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
                     @Override
                     public void doAction() {
                         onNewGame();
-                        setCanceled(false);
+                        cancelRestart();
                     }
 
                     @Override 
@@ -332,7 +350,8 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
                     public void doAction() {
                         mGui.getScreen().stopScreen();
                         mTerminalObserver.stop();
-                        setCanceled(false);
+                        cancelRestart();
+                        cancelRedraw();
                     }
 
                     @Override 
