@@ -49,6 +49,10 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
     
     private OptionsMenu mOptionsMenu = new OptionsMenu();
     
+    private LoseMessageBox mLoseMessage = new LoseMessageBox();
+    
+    private WinMessageBox mWinMessage = new WinMessageBox();
+    
     /**
      * @param args the command line arguments
      */
@@ -227,7 +231,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
             mInfo.deleteLife();
             mInfo.deleteKey();
         } else {
-            mLab.stop();
+            mLoseMessage.show();
             onNewGame();
         }
         mPanel.draw();
@@ -237,6 +241,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
     }
     
     private void onWin() {
+        mWinMessage.show();
         mInfo.nextLevel();
         mInfo.deleteKey();
         mPanel.draw();
@@ -352,6 +357,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
                 }, 
                 
                 new Action() {
+                    
 
                     @Override
                     public void doAction() {
@@ -367,6 +373,26 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
                 }
             });
         }
+    }
+    
+    private class LoseMessageBox extends GameMenu {
+
+        @Override
+        protected void showWindow() {
+            MessageBox.showMessageBox(mGui, "You've lost!", "Unfortunetaly you were eaten by a monster. May be next time you'll have more luck.");
+            cancelRestart();
+        }
+        
+    }
+    
+    private class WinMessageBox extends GameMenu {
+
+        @Override
+        protected void showWindow() {
+            MessageBox.showMessageBox(mGui, "Congratulations!", "Congratulations! You have successfully completed this level!");
+            cancelRestart();
+        }
+        
     }
 }
     
