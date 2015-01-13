@@ -268,7 +268,10 @@ public class Labyrinth {
         int end_x = start_x + Math.min(height, mMapHeight - start_x);
         int end_y = start_y + Math.min(width, mMapWidth - start_y);
         Logger.log(start_x + " " + start_y + " " + end_x + " " + end_y);
-        mVisibleFrame = new Frame(new Position(start_x, start_y), new Position(end_x, end_y), mStart);
+        int frame_x = (height - (end_x - start_x)) / 2  + mStart.getX();
+        int frame_y = (width - (end_y - start_y) ) / 2 + mStart.getY();
+        Logger.log(frame_x + " " + frame_y);
+        mVisibleFrame = new Frame(new Position(start_x, start_y), new Position(end_x, end_y), new Position(frame_x, frame_y));
     }
     
     private void drawObject(GameObject obj) {
@@ -304,7 +307,7 @@ public class Labyrinth {
         int type = Integer.parseInt(value);
         return createGameObject(new Position(x, y), type);
     }
-    
+
     /*
      * Visible part of labyrinth. This class is responsible for drawing object on the terminal.
     */

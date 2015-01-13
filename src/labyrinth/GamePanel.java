@@ -33,7 +33,6 @@ public class GamePanel {
     
     private GameInfo mInfo;
     
-    private int mTerminalWidth;
     
     private int mLivesStartPos;
     
@@ -48,7 +47,6 @@ public class GamePanel {
     public GamePanel(Terminal t, GameInfo info) {
         mTerminal = t;
         mInfo = info;
-        mTerminalWidth = t.getTerminalSize().getColumns();
         mLivesStartPos = 1;
         mKeyStartPos = mInfo.getInitLives() + mLivesStartPos + 3;
         mLevelStartPos = mKeyStartPos + 6;
@@ -74,7 +72,7 @@ public class GamePanel {
     
     
     private void paint() {
-        for (int i = 0; i < mTerminalWidth; i++) {
+        for (int i = 0; i < mTerminal.getTerminalSize().getColumns(); i++) {
             mTerminal.moveCursor(i, 0);
             mTerminal.applyBackgroundColor(Color.WHITE);
             mTerminal.putCharacter(' ');

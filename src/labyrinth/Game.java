@@ -14,6 +14,7 @@ import com.googlecode.lanterna.gui.dialog.MessageBox;
 import com.googlecode.lanterna.input.Key;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.TerminalSize;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +27,7 @@ import javax.swing.JFileChooser;
  * Class, that contains logic of the game.
  * @author melkonyan
  */
-public class Game implements MovableObserver, TerminalObserver.OnClickListener {
+public class Game implements MovableObserver, TerminalObserver.OnClickListener, Terminal.ResizeListener {
 
     private static final String PROPERTIES_PLAYER_X = "Player_x";
     
@@ -71,13 +72,12 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         mTerminal = screen.getTerminal();
         screen.startScreen();
         mLab = new Labyrinth(mTerminal, new Position(1, 0), this);
+        mTerminal.addResizeListener(this);
         mInfo = new GameInfo(2);
         mPanel = new GamePanel(mTerminal, mInfo);
         onNewGame();
         mTerminalObserver = new TerminalObserver(mTerminal);
         mTerminalObserver.setOnClickListener(this);
-        
-        
     }
     
     public void createPlayer() {
@@ -242,6 +242,13 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener {
         mPanel.draw();
         mLab.stop();
         onNewLevel();
+    }
+
+    @Override
+    public void onResized(TerminalSize ts) {
+        mTerminal.clearScreen();
+        mLab.refresh();
+        mPanel.draw();
     }
     
     private abstract class GameMenu{
