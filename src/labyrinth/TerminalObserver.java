@@ -17,7 +17,7 @@ import java.util.TimerTask;
  */
 public class TerminalObserver {
     
-    private static final long TIMER_PERIOD = 20;
+    private static final long TIMER_PERIOD = 50;
     
     private static final long TIMER_DELAY = 20;
     
@@ -40,6 +40,8 @@ public class TerminalObserver {
                     @Override
                     public void run() {
                         Key input = mTerminal.readInput();
+                        System.out.println("Reading input: " + input);
+                        
                         if (mListener != null && input != null) {
                             mListener.onClicked(input);
                         }

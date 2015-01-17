@@ -21,8 +21,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import javax.swing.JFileChooser;
+
+
 /**
  * Class, that contains logic of the game.
  * @author melkonyan
@@ -53,6 +56,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
     
     private WinMessageBox mWinMessage = new WinMessageBox();
     
+    private SoundController mPlayer = new SoundController();
     /**
      * @param args the command line arguments
      */
@@ -82,6 +86,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
         onNewGame();
         mTerminalObserver = new TerminalObserver(mTerminal);
         mTerminalObserver.setOnClickListener(this);
+        mPlayer.playBackground();
     }
     
     public void createPlayer() {
@@ -98,10 +103,13 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
         }
         GameObject obstacle = mLab.getObject(to);
         if (m instanceof Player) {
-            Logger.log(""+mInfo.hasKey());
-            return !(obstacle instanceof Wall) 
+            boolean canMove = !(obstacle instanceof Wall) 
                     && !(obstacle instanceof Exit && !mInfo.hasKey())
                         && !(obstacle instanceof Enter);
+            if (!canMove) {
+                mPlayer.playWall();
+            }
+            return canMove;
         } else if (m instanceof MovingMonster) {
             return obstacle instanceof Road;
         } else {
@@ -117,6 +125,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
         GameObject obstacle = mLab.getObject(to);
         if (m instanceof Player) {
             if (obstacle instanceof Keys) {
+                mPlayer.playKeys();
                 mLab.deleteObject(to);
                 mInfo.addKey();
                 mPanel.draw();
@@ -227,10 +236,14 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
     }
     
     private void onDie() {
+        
         if (mInfo.hasMoreLives()) {
+            mPlayer.playDie();
             mInfo.deleteLife();
             mInfo.deleteKey();
+            
         } else {
+            mPlayer.playLose();
             mLoseMessage.show();
             onNewGame();
         }
@@ -241,6 +254,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
     }
     
     private void onWin() {
+        mPlayer.playWin();
         mWinMessage.show();
         mInfo.nextLevel();
         mInfo.deleteKey();
@@ -361,10 +375,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
 
                     @Override
                     public void doAction() {
-                        mGui.getScreen().stopScreen();
-                        mTerminalObserver.stop();
-                        cancelRestart();
-                        cancelRedraw();
+                        System.exit(0);
                     }
 
                     @Override 
