@@ -5,14 +5,14 @@
  */
 package labyrinth;
 
-import javazoom.jlgui.basicplayer.BasicPlayer;
 import maryb.player.Player;
+import maryb.player.PlayerEventListener;
+
 /**
  *
  * @author melkonyan
  */
 public class SoundController {
-    
     
     private static final String PLAYER_STEP = "sounds/player_step.mp3";
     
@@ -20,7 +20,7 @@ public class SoundController {
     
     private static final String WALL = "sounds/wall.mp3";
     
-    private static final String BACKGROUND = "sounds/background1";
+    private static final String BACKGROUND = "sounds/background.mp3";
     
     private static final String WIN = "sounds/win.mp3";
     
@@ -28,18 +28,15 @@ public class SoundController {
     
     private static final String LOSE = "sounds/lose.mp3";
     
-    private BasicPlayer mBackground;
-            
     private maryb.player.Player mBackgroundPlayer;
     
-    private Player mDefaultPlayer = new Player();
+    private boolean mSoundOn = true;
     
     public SoundController() {
-        mDefaultPlayer.setCurrentVolume(1f);
     }
     
     public void playWin() {
-        playSound(WIN);
+        playSound(WIN, 0.8f);
     }
     
     public void playLose() {
@@ -47,7 +44,7 @@ public class SoundController {
     }
     
     public void playDie() {
-        playSound(PLAYER_DEATH);
+        playSound(PLAYER_DEATH, 0.8f);
     }
     
     public void playKeys() {
@@ -59,18 +56,55 @@ public class SoundController {
     }
     
     public void playBackground() {
-        mBackgroundPlayer = new Player();
-        mBackgroundPlayer.setCurrentVolume(0.5f);
-        mBackgroundPlayer.setSourceLocation(BACKGROUND);
-        mBackgroundPlayer.play();
+        mBackgroundPlayer = playSound(BACKGROUND, 0.5f);
+        mBackgroundPlayer.setListener(new PlayerEventListener() {
+
+            @Override
+            public void endOfMedia() {
+                mBackgroundPlayer.seek(0);
+                mBackgroundPlayer.play();
+            }
+
+            @Override
+            public void stateChanged() {
+            }
+
+            @Override
+            public void buffer() {
+            }
+        });
     }
     
-    private void playSound(String file)  {
-        Player player = new Player();
-        player.setCurrentVolume(1f);
-        player.setSourceLocation(file);
-        player.play();
+    public boolean isOn() {
+        return mSoundOn;
     }
+    
+    public void switchSound() {
+        mSoundOn = !mSoundOn;
+        if (mSoundOn) {
+            mBackgroundPlayer.play();
+        } else {
+            mBackgroundPlayer.pause();
+        }
+    }
+    
+    private Player playSound(String file)  {
+        return playSound(file, 1f);
+    }
+    
+    private Player playSound(String file, float volume) {
+        return playSound(new Player(), file, volume);
+    }
+    
+    private Player playSound(Player player, String file, float volume) {
+        player.setCurrentVolume(volume);
+        player.setSourceLocation(file);
+        if (mSoundOn) {
+            player.play();
+        }
+        return player;
+    }
+    
     
     
     

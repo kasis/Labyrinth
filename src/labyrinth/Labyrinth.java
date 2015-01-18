@@ -63,8 +63,8 @@ public class Labyrinth {
      */
     public void createLevel() throws Exception {
         Generate.main(null);
-        Properties prop = Utils.load("level.properties");
-        //Properties prop = Utils.load("test_level.properties");
+        //Properties prop = Utils.load("level.properties");
+        Properties prop = Utils.load("test_level.properties");
         
         setData(prop);
     }

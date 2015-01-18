@@ -17,6 +17,9 @@ public class Player extends GameObject implements Movable {
 
     private Mover mMover;
     
+    private Delay mDelay;
+    
+    private long WAIT_TIME = 50;
     /**
      * To construct player you need to specify it's position an observer, that looks if player has moved.
      * @param pos       initial position of player.
@@ -24,8 +27,9 @@ public class Player extends GameObject implements Movable {
      */
     public Player(Position pos, MovableObserver observer) {
         super(pos);
-        Logger.log("Creating player at position " + pos);
+        //Logger.log("Creating player at position " + pos);
         mMover = new Mover(this, observer);
+        mDelay = new Delay(WAIT_TIME);
     }
     
     /**
@@ -33,8 +37,11 @@ public class Player extends GameObject implements Movable {
      * @param dir   direction to move.
      */
     public void move(Direction dir) {
-        Logger.log("Player.move: Moving into direction " + dir);
-        mMover.move(dir);
+        if (mDelay.isFree()) {
+            //Logger.log("Player.move: Moving into direction " + dir);
+            mMover.move(dir);
+            mDelay.lock();
+        }
     }
     
     @Override
@@ -49,13 +56,13 @@ public class Player extends GameObject implements Movable {
 
     @Override
     public Position calcNewPosition(Direction dir) {
-        Logger.log("Player.calcNewPosition: New position for direction " + dir + " is " + dir.getNewPosition(getPosition()));
+        //Logger.log("Player.calcNewPosition: New position for direction " + dir + " is " + dir.getNewPosition(getPosition()));
         return dir.getNewPosition(getPosition());
     }
 
     @Override
     public void goToPosition(Position pos) {
-        Logger.log("Player.goToPosition: new position - " + pos);
+        //Logger.log("Player.goToPosition: new position - " + pos);
         setPosition(pos);
     }
     

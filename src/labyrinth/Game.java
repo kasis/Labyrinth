@@ -61,12 +61,6 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-        /*Terminal terminal = TerminalFacade.createSwingTerminal();
-        terminal.putCharacter('a');
-        terminal.moveCursor(1,1);
-        System.out.println("ok");
-        terminal.enterPrivateMode();
-        */
         Game lab = new Game();
     }
 
@@ -81,12 +75,12 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
         screen.startScreen();
         mLab = new Labyrinth(mTerminal, new Position(1, 0), this);
         mTerminal.addResizeListener(this);
-        mInfo = new GameInfo(2);
+        mInfo = new GameInfo(1);
         mPanel = new GamePanel(mTerminal, mInfo);
         onNewGame();
         mTerminalObserver = new TerminalObserver(mTerminal);
         mTerminalObserver.setOnClickListener(this);
-        //mPlayer.playBackground();
+        mPlayer.playBackground();
     }
     
     public void createPlayer() {
@@ -140,9 +134,9 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
         } else if (m instanceof MovingMonster) {
             if (mLab.getPlayer().getPosition().equals(to)) {
                 onDie();
+            } else {
+                mLab.moveMonster((MovingMonster) m, from);
             }
-            mLab.moveMonster((MovingMonster) m, from);
-        
         }
     }
 
@@ -366,6 +360,20 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
                     @Override 
                     public String toString() {
                         return "Save game";
+                    } 
+                
+                }, 
+                
+                new Action() {
+
+                    @Override
+                    public void doAction() {
+                        mPlayer.switchSound();
+                    }
+                    
+                    @Override 
+                    public String toString() {
+                        return "Sound " + (mPlayer.isOn() ? "off" : "on");
                     } 
                 
                 }, 

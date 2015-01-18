@@ -71,7 +71,7 @@ public class MovingMonster extends Monster implements Movable {
         
         private Random mRandom = new Random();
         
-        private long mSpeed = 500;
+        private long mSpeed = 200;
         
         Timer mTimer;
         
