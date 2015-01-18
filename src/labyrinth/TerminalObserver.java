@@ -17,7 +17,7 @@ import java.util.TimerTask;
  */
 public class TerminalObserver {
     
-    private static final long TIMER_PERIOD = 50;
+    private static final long TIMER_PERIOD = 300;
     
     private static final long TIMER_DELAY = 20;
     

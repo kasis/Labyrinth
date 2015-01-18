@@ -86,7 +86,7 @@ public class Game implements MovableObserver, TerminalObserver.OnClickListener, 
         onNewGame();
         mTerminalObserver = new TerminalObserver(mTerminal);
         mTerminalObserver.setOnClickListener(this);
-        mPlayer.playBackground();
+        //mPlayer.playBackground();
     }
     
     public void createPlayer() {
